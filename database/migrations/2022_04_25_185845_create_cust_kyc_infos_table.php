@@ -20,12 +20,12 @@ class CreateCustKycInfosTable extends Migration
             $table->string('last_name');
             $table->string('mobile_no');
             $table->string('date_of_birth');
-            $table->integer('kyc_type_id');
-            $table->integer('ovd_type_id');
-            $table->foreign('kyc_type_id')->references('kyc_type_id')->on('kyc_types')->onDelete('cascade');
-            $table->foreign('ovd_type_id')->references('ovd_type_id')->on('ovd_types')->onDelete('cascade');;
+            $table->unsignedBigInteger('kyc_type_id');
+            $table->unsignedBigInteger('ovd_type_id');
             $table->string('ovd_no');
             $table->timestamps();
+            $table->foreign('kyc_type_id')->references('kyc_type_id')->on('kyc_types')->onDelete('cascade');
+            $table->foreign('ovd_type_id')->references('ovd_type_id')->on('ovd_types')->onDelete('cascade');
         });
     }
 

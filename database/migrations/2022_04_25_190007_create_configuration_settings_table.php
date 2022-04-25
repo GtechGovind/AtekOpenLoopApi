@@ -16,11 +16,11 @@ class CreateConfigurationSettingsTable extends Migration
         Schema::create('configuration_settings', function (Blueprint $table) {
             $table->id();
             $table->integer('otp_validity');
-            $table->integer('otp_validity_unit');
+            $table->unsignedBigInteger('otp_validity_unit');
             $table->foreign('otp_validity_unit')->references('unit_type_id')->on('unit_types')->onDelete('cascade');
             $table->integer('otp_digit_count');
             $table->integer('session_validity');
-            $table->integer('session_validity_unit');
+            $table->unsignedBigInteger('session_validity_unit');
             $table->foreign('session_validity_unit')->references('unit_type_id')->on('unit_types')->onDelete('cascade');
             $table->integer('min_kyc_account_balance_limit');
             $table->timestamps();

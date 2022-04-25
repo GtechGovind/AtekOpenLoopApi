@@ -15,7 +15,7 @@ class CreateIssueCardsTable extends Migration
     {
         Schema::create('issue_cards', function (Blueprint $table) {
             $table->id('issue_card_id');
-            $table->integer('cust_id');
+            $table->unsignedBigInteger('cust_id');
             $table->foreign('cust_id')->references('cust_id')->on('cust_kyc_infos')->onDelete('cascade');
             $table->string('card_pan_no');
             $table->string('card_cvv_no');
