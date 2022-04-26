@@ -85,4 +85,31 @@ class AuthController extends Controller
         ]);
     }
 
+    static function isSessionValid($session_token)
+    {
+        $user_data = UserSession::where('session_token', $session_token)
+            ->first();
+
+        if (is_null($user_data)) return response([
+            'success' => false,
+            'message' => 'Something went wrong !',
+            'errors' => [
+                'session' => [
+                    "Invalid request, no data found !"
+                ]
+            ]
+        ]);
+
+        if (Carbon::create($user_data->session_expires_at)->timestamp < Carbon::now()->timestamp) return response([
+            'success' => false,
+            'message' => 'Something went wrong !',
+            'errors' => [
+                'session' => [
+                    "Session is expired !"
+                ]
+            ]
+        ]);
+
+    }
+
 }
