@@ -18,7 +18,15 @@ class KycController extends Controller
             'session_token' => 'required',
         ]);
 
-        AuthController::isSessionValid($data['session_token']);
+        if (!AuthController::isSessionValid($data['session_token'])) return response([
+            'success' => false,
+            'message' => 'Something went wrong !',
+            'errors' => [
+                'session' => [
+                    "Session is expired !"
+                ]
+            ]
+        ]);
 
         $mobile_no = $request->input('mobile_no');
         $user_kyc = CustKycInfo::where('mobile_no', $mobile_no)->first();
