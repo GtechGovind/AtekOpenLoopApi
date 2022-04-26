@@ -24,3 +24,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 //Card Issuence
 Route::post('/card/insert',[\App\Http\Controllers\Module\Card\CardContoller::class,'insertCardData']);
+
+Route::post('/card/issue',[\App\Http\Controllers\Module\Card\CardContoller::class,'issueCard']);
