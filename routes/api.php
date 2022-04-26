@@ -20,3 +20,7 @@ Route::post('/kyc', [KycController::class, 'kycUser']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+//Card Issuence
+Route::post('/card/insert',[\App\Http\Controllers\Module\Card\CardContoller::class,'insertCardData']);
