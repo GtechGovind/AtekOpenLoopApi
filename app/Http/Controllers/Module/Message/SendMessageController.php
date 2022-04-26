@@ -22,12 +22,20 @@ class SendMessageController extends Controller
                 new SMS(
                     "91$mobile_no",
                     "AtekMetro",
-                    "Your OYP for Mumbai Metro One Card is $otp"
+                    "Your OTP for Mumbai Metro One Card is $otp"
                 )
             );
 
         } catch (ClientExceptionInterface|Client\Exception\Exception $e) {
-
+            return response([
+                'success' => false,
+                'message' => 'System error occurred !',
+                'errors' => [
+                    'otp' => [
+                        $e->getMessage()
+                    ]
+                ]
+            ]);
         }
 
     }
@@ -42,7 +50,7 @@ class SendMessageController extends Controller
                 "from": "14157386102",
                 "to": "91' . $mobile_no . '",
                 "message_type": "text",
-                "text": "Your OYP for Mumbai Metro One Card is ' . $otp . '",
+                "text": "Your OTP for Mumbai Metro One Card is ' . $otp . '",
                 "channel": "whatsapp"
               }', 'application/json')
             ->post('https://messages-sandbox.nexmo.com/v1/messages')
