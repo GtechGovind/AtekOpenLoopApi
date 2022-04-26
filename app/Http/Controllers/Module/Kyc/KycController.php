@@ -76,7 +76,7 @@ class KycController extends Controller
                 'cust_id' => CustKycInfo::where('mobile_no', $data['mobile_no'])->first()->cust_id
             ]);
         }else{
-            
+
             return response([
                'success' => false,
                'error' => 'Session expired, generate OTP again'
