@@ -40,7 +40,15 @@ class CardController extends Controller
             'card_pan_no' => 'required|max:16|min:16'
         ]);
 
-        AuthController::isSessionValid($data['session_token']);
+        if (!AuthController::isSessionValid($data['session_token'])) return response([
+            'success' => false,
+            'message' => 'Something went wrong !',
+            'errors' => [
+                'session' => [
+                    "Session is expired !"
+                ]
+            ]
+        ]);
 
         $cardData = $this->getCardData($data['card_pan_no']);
 

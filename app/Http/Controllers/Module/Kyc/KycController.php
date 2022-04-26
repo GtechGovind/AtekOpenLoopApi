@@ -54,7 +54,15 @@ class KycController extends Controller
             'session_token' => 'required',
         ]);
 
-        AuthController::isSessionValid($data['session_token']);
+        if (!AuthController::isSessionValid($data['session_token'])) return response([
+            'success' => false,
+            'message' => 'Something went wrong !',
+            'errors' => [
+                'session' => [
+                    "Session is expired !"
+                ]
+            ]
+        ]);
 
         $user_kyc = new CustKycInfo();
         $user_kyc->create($data);
