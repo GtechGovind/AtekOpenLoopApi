@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Module\Kyc;
 
 use App\Http\Controllers\Controller;
 use App\Models\CustKycInfo;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KycController extends Controller
 {
@@ -16,21 +18,34 @@ class KycController extends Controller
 
         $mobile_no = $request->input('mobile_no');
         $user_kyc = CustKycInfo::where('mobile_no', $mobile_no)->first();
+        $time = Carbon::now();
+        $currentTime = $time->toDateTimeString();
+        $session = DB::table('user_sessions')
+            ->where('mobile_no','=',$mobile_no)
+            ->orderBy('user_session_id','desc')
+            ->first();
 
-        if (is_null($user_kyc)) return response([
-            'success' => false,
-            'message' => 'User does not have kyc!',
-            'errors' => [
-                'kyc' => [
-                    "No KYC found for mobile number '$mobile_no'"
+        if($currentTime <= $session->session_expires_at){
+            if (is_null($user_kyc)) return response([
+                'success' => false,
+                'message' => 'User does not have kyc!',
+                'errors' => [
+                    'kyc' => [
+                        "No KYC found for mobile number '$mobile_no'"
+                    ]
                 ]
-            ]
-        ]);
+            ]);
 
-        return response([
-            'success' => true,
-            'cust_id' => $user_kyc->cust_id
-        ]);
+            return response([
+                'success' => true,
+                'cust_id' => $user_kyc->cust_id
+            ]);
+        }else{
+            return response([
+               'success' => false,
+               'error' => 'Session expired, generate OTP again'
+            ]);
+        }
 
     }
 
@@ -46,14 +61,29 @@ class KycController extends Controller
             'ovd_type_id' => 'required',
             'ovd_no' => 'required|unique:cust_kyc_infos'
         ]);
+        $time = Carbon::now();
+        $currentTime = $time->toDateTimeString();
+        $session = DB::table('user_sessions')
+            ->where('mobile_no','=',$request->input('mobile_no'))
+            ->orderBy('user_session_id','desc')
+            ->first();
+        if($currentTime <= $session->session_expires_at){
+            $user_kyc = new CustKycInfo();
+            $user_kyc->create($data);
 
-        $user_kyc = new CustKycInfo();
-        $user_kyc->create($data);
+            return response([
+                'success' => true,
+                'cust_id' => CustKycInfo::where('mobile_no', $data['mobile_no'])->first()->cust_id
+            ]);
+        }else{
+            
+            return response([
+               'success' => false,
+               'error' => 'Session expired, generate OTP again'
+            ]);
+        }
 
-        return response([
-            'success' => true,
-            'cust_id' => CustKycInfo::where('mobile_no', $data['mobile_no'])->first()->cust_id
-        ]);
+
 
     }
 
