@@ -7,6 +7,7 @@ use App\Http\Controllers\Module\Message\SendMessageController;
 use App\Models\UserSession;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Psr\Http\Client\ClientExceptionInterface;
 use Vonage\Client;
 use Vonage\Client\Credentials\Basic;
@@ -90,9 +91,19 @@ class AuthController extends Controller
         $user_data = UserSession::where('session_token', $session_token)
             ->first();
 
-        if (is_null($user_data)) return false;
-        if (Carbon::create($user_data->session_expires_at)->timestamp < Carbon::now()->timestamp) false;
-        return true;
+        if(is_null($user_data)){
+            return false;
+        }else{
+          $expire = $user_data->session_expires_at;
+            $time = Carbon::now();
+            $currentTime = $time->toDateTimeString();
+            if($currentTime <= $expire){
+                return true;
+            }else{
+                return false;
+            }
+        }
+
 
     }
 

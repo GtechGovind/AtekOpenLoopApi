@@ -14,7 +14,7 @@ class CustAccController extends Controller
           $data = $request->validate([
                'cust_id' => 'required',
                'session_token' => 'required',
-                'amount' => 'required|min:100'
+                'amount' => 'required'
             ]);
 
         if (!AuthController::isSessionValid($data['session_token'])) return response([

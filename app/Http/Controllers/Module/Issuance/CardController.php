@@ -62,6 +62,12 @@ class CardController extends Controller
             $issueCard->is_blocked = false;
             $issueCard->save();
 
+            DB::table('card_inventories')
+                ->where('card_pan_no','=',$data['card_pan_no'])
+                ->update([
+                    'is_issued' => false
+                ]);
+            
             return response([
                 'success' => true,
             ]);
@@ -72,7 +78,7 @@ class CardController extends Controller
             'success' => false,
             'message' => 'Something went wrong !',
             'errors' => [
-                'otp' => [
+                'card' => [
                     "Invalid request, no data found !"
                 ]
             ]
