@@ -48,6 +48,12 @@ class CustAccController extends Controller
                     'eligible_limit' => env('MinAmount')
                 ]);
 
+                DB::table('cust_tnxes')->insert([
+                    'cust_id'=>$request->input('cust_id'),
+                    'tnx_type_id'=>env('CREDIT'),
+                    'tnx_amount' => $request->input('amount')
+                ]);
+
                 return response([
                     'success'=>true,
                     'Message' => 'Recharged successfully'
@@ -60,6 +66,17 @@ class CustAccController extends Controller
                 'chip_balance' => $request->input('amount'),
                 'total_balance' => $request ->input('amount'),
                 'eligible_limit' => env('MaxAmount')
+            ]);
+
+            DB::table('cust_tnxes')->insert([
+                'cust_id'=>$request->input('cust_id'),
+                'tnx_type_id'=>env('CREDIT'),
+                'tnx_amount' => $request->input('amount')
+            ]);
+
+            return response([
+                'success'=>true,
+                'Message' => 'Recharged successfully'
             ]);
 
         }else{
@@ -79,6 +96,12 @@ class CustAccController extends Controller
                     'acc_balance'=>$AccBalance,
                     'chip_balance' => $chipAmount
                 ]);
+           DB::table('cust_tnxes')->insert([
+                    'cust_id'=>$UserExist->cust_id,
+                    'tnx_type_id'=>env('CREDIT'),
+                    'tnx_amount' => $amt
+           ]);
+
             return response([
                 'success' => true,
                 'message' => 'Amount updated successfully'
