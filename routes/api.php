@@ -23,3 +23,9 @@ Route::post('/kyc', [KycController::class, 'kycUser']);
  */
 Route::post('/card/issue',[CardController::class,'issueCard']);
 
+
+/*
+ * Account Maintaing
+ */
+
+Route::post('/card/recharge',[\App\Http\Controllers\Module\AccountMaintaing\CustAccController::class,'RechargeCard']);

@@ -18,6 +18,7 @@ class CustKycInfo extends Model
         'first_name',
         'middle_name',
         'last_name',
+        'gender',
         'mobile_no',
         'date_of_birth',
         'kyc_type_id',

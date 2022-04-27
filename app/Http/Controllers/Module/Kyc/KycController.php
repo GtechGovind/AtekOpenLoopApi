@@ -14,7 +14,7 @@ class KycController extends Controller
     function checkUserKyc(Request $request)
     {
         $data = $request->validate([
-            'mobile_no' => 'required|min:10|max:10',
+            'mobile_no'     => 'required|min:10|max:10',
             'session_token' => 'required',
         ]);
 
@@ -51,14 +51,15 @@ class KycController extends Controller
     function kycUser(Request $request)
     {
         $data = $request->validate([
-            'first_name' => 'required|min:2|max:30',
-            'middle_name' => 'required|min:2|max:30',
-            'last_name' => 'required|min:2|max:30',
-            'mobile_no' => 'required|min:10|max:10|unique:cust_kyc_infos',
+            'first_name'    => 'required|min:2|max:30',
+            'middle_name'   => 'required|min:2|max:30',
+            'last_name'     => 'required|min:2|max:30',
+            'gender'        => 'required|min:1|max:3',
+            'mobile_no'     => 'required|min:10|max:10|unique:cust_kyc_infos',
             'date_of_birth' => 'required',
-            'kyc_type_id' => 'required',
-            'ovd_type_id' => 'required',
-            'ovd_no' => 'required|unique:cust_kyc_infos',
+            'kyc_type_id'   => 'required',
+            'ovd_type_id'   => 'required',
+            'ovd_no'        => 'required|unique:cust_kyc_infos',
             'session_token' => 'required',
         ]);
 

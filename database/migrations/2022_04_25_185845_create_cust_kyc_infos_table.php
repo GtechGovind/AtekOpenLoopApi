@@ -18,6 +18,7 @@ class CreateCustKycInfosTable extends Migration
             $table->string('first_name');
             $table->string('middle_name');
             $table->string('last_name');
+            $table->integer('gender');
             $table->string('mobile_no');
             $table->string('date_of_birth');
             $table->unsignedBigInteger('kyc_type_id');
