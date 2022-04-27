@@ -67,7 +67,7 @@ class CardController extends Controller
                 ->update([
                     'is_issued' => false
                 ]);
-            
+
             return response([
                 'success' => true,
             ]);

@@ -52,7 +52,7 @@ class KycController extends Controller
     {
         $data = $request->validate([
             'first_name'    => 'required|min:2|max:30',
-            'middle_name'   => 'required|min:2|max:30',
+            'middle_name'   => 'required|min:1|max:30',
             'last_name'     => 'required|min:2|max:30',
             'gender'        => 'required|min:1|max:3',
             'mobile_no'     => 'required|min:10|max:10|unique:cust_kyc_infos',

@@ -61,9 +61,16 @@ class CustAccController extends Controller
                 'total_balance' => $request ->input('amount'),
                 'eligible_limit' => env('MaxAmount')
             ]);
+
         }else{
             $amt = $request->input('amount');
            $currentAmount= $UserExist->total_balance + $amt;
+           if($currentAmount == $UserExist->eligible_limit){
+               return response([
+                  'success'=> false,
+                  'message' => 'User reached to Eligile Limit'
+               ]);
+           }
             DB::table('cust_balances')
                 ->where('cust_id','=',$UserExist->cust_id)
                 ->orderBy('cust_balance_id','desc')
