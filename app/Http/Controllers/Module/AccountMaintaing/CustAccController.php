@@ -17,7 +17,7 @@ class CustAccController extends Controller
                 'amount' => 'required'
             ]);
 
-        if (!AuthController::isSessionValid($data['session_token'],$data['cust_id'])) return response([
+        if (!AuthController::isSessionValid($data['session_token'])) return response([
             'success' => false,
             'message' => 'Something went wrong !',
             'errors' => [

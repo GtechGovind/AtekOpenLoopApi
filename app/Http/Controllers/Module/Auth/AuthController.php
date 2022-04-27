@@ -86,10 +86,10 @@ class AuthController extends Controller
         ]);
     }
 
-    static function isSessionValid($session_token ,$cust_id)
+    static function isSessionValid($session_token )
     {
         $user_data = UserSession::where('session_token', $session_token)
-            ->where('cust_id','=',$cust_id)
+
             ->first();
 
         if(is_null($user_data)){
