@@ -17,7 +17,7 @@ class CustAccController extends Controller
                 'amount' => 'required'
             ]);
 
-        if (!AuthController::isSessionValid($data['session_token'])) return response([
+        if (!AuthController::isSessionValid($data['session_token'],$data['cust_id'])) return response([
             'success' => false,
             'message' => 'Something went wrong !',
             'errors' => [
@@ -65,7 +65,7 @@ class CustAccController extends Controller
         }else{
             $amt = $request->input('amount');
            $currentAmount= $UserExist->total_balance + $amt;
-           if($currentAmount == $UserExist->eligible_limit){
+           if($currentAmount >= $UserExist->eligible_limit){
                return response([
                   'success'=> false,
                   'message' => 'User reached to Eligile Limit'
