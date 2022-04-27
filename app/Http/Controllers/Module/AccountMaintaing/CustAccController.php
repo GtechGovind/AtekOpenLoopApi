@@ -64,8 +64,9 @@ class CustAccController extends Controller
 
         }else{
             $amt = $request->input('amount');
-           $currentAmount= $UserExist->total_balance + $amt;
-           if($currentAmount >= $UserExist->eligible_limit){
+           $AccBalance= $UserExist->acc_balance - $amt;
+           $chipAmount = $UserExist->chip_balance + $amt;
+           if($chipAmount >= $UserExist->eligible_limit){
                return response([
                   'success'=> false,
                   'message' => 'User reached to Eligile Limit'
@@ -75,7 +76,8 @@ class CustAccController extends Controller
                 ->where('cust_id','=',$UserExist->cust_id)
                 ->orderBy('cust_balance_id','desc')
                 ->update([
-                    'total_balance'=>$currentAmount
+                    'acc_balance'=>$AccBalance,
+                    'chip_balance' => $chipAmount
                 ]);
             return response([
                 'success' => true,
