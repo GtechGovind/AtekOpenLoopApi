@@ -13,14 +13,18 @@ class CreateIssueCardsTable extends Migration
      */
     public function up()
     {
-        Schema::create('issue_cards', function (Blueprint $table) {
-            $table->id('issue_card_id');
+        Schema::create('cust_card_info', function (Blueprint $table) {
+            $table->id('cust_card_info_id');
             $table->unsignedBigInteger('cust_id');
             $table->foreign('cust_id')->references('cust_id')->on('cust_kyc_infos')->onDelete('cascade');
-            $table->string('card_pan_no');
-            $table->string('card_cvv_no');
-            $table->dateTime('card_expiry');
+            $table->string('card_no');
+            $table->string('card_fee');
             $table->boolean('is_blocked');
+            $table->string('acc_balance');
+            $table->string('chip_balance')->default(0);
+            $table->string('total_balance');
+            $table->string('monthly_recharge');
+            $table->string('eligible_limit');
             $table->timestamps();
         });
     }

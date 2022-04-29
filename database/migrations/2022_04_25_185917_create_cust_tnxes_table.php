@@ -13,8 +13,8 @@ class CreateCustTnxesTable extends Migration
      */
     public function up()
     {
-        Schema::create('cust_tnxes', function (Blueprint $table) {
-            $table->id('tnx_id');
+        Schema::create('cust_tnx', function (Blueprint $table) {
+            $table->id('cus_tnx_id');
             $table->unsignedBigInteger('cust_id');
             $table->unsignedBigInteger('tnx_type_id');
             $table->foreign('cust_id')->references('cust_id')->on('cust_kyc_infos')->onDelete('cascade');

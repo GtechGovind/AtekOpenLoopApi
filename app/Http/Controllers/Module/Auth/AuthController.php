@@ -74,16 +74,40 @@ class AuthController extends Controller
 
         $user_session->session_token = hash(
             'sha1',
-            $user_session->mobile_number + $user_session->otp + Carbon::now()->timestamp
+            $user_session->mobile_no + $user_session->otp + Carbon::now()->timestamp
         );
+
         $user_session->session_created_at = Carbon::now();
         $user_session->session_expires_at = Carbon::now()->addMinutes(25);
         $user_session->save();
+        $userKycinfo =  DB::table('cust_kyc_infos')
+            ->where('mobile_no', '=',$user_session->mobile_no)
+            ->first();
 
-        return response([
-            'success' => true,
-            'session_token' => $user_session->session_token
-        ]);
+        if(!is_null($userKycinfo)) {
+            $card_info = DB::table('cust_card_info')
+                ->where('cust_id', '=', $userKycinfo->cust_id)
+                ->first();
+
+            if (!is_null($card_info)) {
+                return response([
+                    'success' => true,
+                    'card' => true,
+                    'session_token' => $user_session->session_token,
+                    'card_details' => $card_info
+                ]);
+            }
+        } else {
+
+            return response([
+                'success' => true,
+                'card' => false,
+                'session_token' => $user_session->session_token
+            ]);
+        }
+
+
+
     }
 
     static function isSessionValid($session_token)

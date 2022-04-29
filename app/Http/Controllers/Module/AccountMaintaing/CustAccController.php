@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\DB;
 class CustAccController extends Controller
 {
     public function RechargeCard(Request $request){
-          $data = $request->validate([
-               'cust_id' => 'required',
-               'session_token' => 'required',
-                'amount' => 'required'
-            ]);
+        $data = $request->validate([
+            'cust_id' => 'required',
+            'session_token' => 'required',
+            'card_no' => 'required',
+            'amount' => 'required'
+        ]);
 
         if (!AuthController::isSessionValid($data['session_token'])) return response([
             'success' => false,
@@ -27,10 +28,10 @@ class CustAccController extends Controller
             ]
         ]);
 
-        $UserExist = DB::table('cust_balances')
-                    ->where('cust_id','=',$request->input('cust_id'))
-                    ->orderBy('cust_balance_id','desc')
-                    ->first();
+        $UserExist = DB::table('cust_card_info')
+            ->where('cust_id','=',$request->input('cust_id'))
+            ->orderBy('cust_card_info_id','desc')
+            ->first();
 
 
         if(is_null($UserExist))
@@ -39,20 +40,32 @@ class CustAccController extends Controller
             $cust_kyc_type = DB::table('cust_kyc_infos')
                 ->where('cust_id','=',$request->input('cust_id'))
                 ->first();
+            $card_fee = DB::table('card_inv')
+                ->where('card_no','=',$request->input('card_no'))
+                ->first();
             if($cust_kyc_type->kyc_type_id == env('MinKyc')){
-                DB::table('cust_balances')->insert([
+                DB::table('cust_card_info')->insert([
                     'cust_id' => $request->input('cust_id'),
+                    'card_no' => $request->input('card_no'),
+                    'card_fee' => $card_fee->card_fee,
+                    'is_blocked'=>false,
                     'acc_balance' => $request->input('amount'),
-                    'chip_balance' => $request->input('amount'),
                     'total_balance' => $request ->input('amount'),
+                    'monthly_recharge'=>$request->input('amount'),
                     'eligible_limit' => env('MinAmount')
                 ]);
 
-                DB::table('cust_tnxes')->insert([
+                DB::table('cust_tnx')->insert([
                     'cust_id'=>$request->input('cust_id'),
                     'tnx_type_id'=>env('CREDIT'),
                     'tnx_amount' => $request->input('amount')
                 ]);
+
+                DB::table('block_wal')
+                    ->where('cust_id','=',$request->input('cust_id'))
+                    ->update([
+                        'is_settle'=>true
+                    ]);
 
                 return response([
                     'success'=>true,
@@ -60,19 +73,29 @@ class CustAccController extends Controller
                 ]);
             }
 
-            DB::table('cust_balances')->insert([
+            DB::table('cust_card_info')->insert([
                 'cust_id' => $request->input('cust_id'),
+                'card_no' => $request->input('card_no'),
+                'card_fee' => $card_fee->card_fee,
+                'is_blocked'=>false,
                 'acc_balance' => $request->input('amount'),
-                'chip_balance' => $request->input('amount'),
                 'total_balance' => $request ->input('amount'),
+                'monthly_recharge'=>$request->input('amount'),
                 'eligible_limit' => env('MaxAmount')
             ]);
 
-            DB::table('cust_tnxes')->insert([
+            DB::table('cust_tnx')->insert([
                 'cust_id'=>$request->input('cust_id'),
                 'tnx_type_id'=>env('CREDIT'),
                 'tnx_amount' => $request->input('amount')
             ]);
+
+
+            DB::table('block_wal')
+                ->where('cust_id','=',$request->input('cust_id'))
+                ->update([
+                    'is_settle'=>true
+                ]);
 
             return response([
                 'success'=>true,
@@ -81,26 +104,28 @@ class CustAccController extends Controller
 
         }else{
             $amt = $request->input('amount');
-           $AccBalance= $UserExist->acc_balance - $amt;
-           $chipAmount = $UserExist->chip_balance + $amt;
-           if($chipAmount >= $UserExist->eligible_limit){
-               return response([
-                  'success'=> false,
-                  'message' => 'User reached to Eligile Limit'
-               ]);
-           }
-            DB::table('cust_balances')
+            $AccBalance= $UserExist->acc_balance - $amt;
+            $chipAmount = $UserExist->chip_balance + $amt;
+            $monthlyBalance = $UserExist->monthly_recharge + $amt;
+            if($monthlyBalance >= $UserExist->eligible_limit){
+                return response([
+                    'success'=> false,
+                    'message' => 'User reached to Eligile Limit'
+                ]);
+            }
+            DB::table('cust_card_info')
                 ->where('cust_id','=',$UserExist->cust_id)
-                ->orderBy('cust_balance_id','desc')
+                ->orderBy('cust_card_info_id','desc')
                 ->update([
                     'acc_balance'=>$AccBalance,
-                    'chip_balance' => $chipAmount
+                    'chip_balance' => $chipAmount,
+                    'monthly_recharge' => $monthlyBalance
                 ]);
-           DB::table('cust_tnxes')->insert([
-                    'cust_id'=>$UserExist->cust_id,
-                    'tnx_type_id'=>env('CREDIT'),
-                    'tnx_amount' => $amt
-           ]);
+            DB::table('cust_tnx')->insert([
+                'cust_id'=>$UserExist->cust_id,
+                'tnx_type_id'=>env('CREDIT'),
+                'tnx_amount' => $amt
+            ]);
 
             return response([
                 'success' => true,

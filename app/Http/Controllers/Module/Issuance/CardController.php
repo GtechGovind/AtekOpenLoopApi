@@ -37,7 +37,9 @@ class CardController extends Controller
         $data = $request->validate([
             'cust_id' => 'required',
             'session_token' => 'required',
-            'card_pan_no' => 'required|max:16|min:16'
+            'card_no' => 'required|max:4|min:4',
+            'amount' => 'required'
+
         ]);
 
         if (!AuthController::isSessionValid($data['session_token'])) return response([
@@ -50,29 +52,61 @@ class CardController extends Controller
             ]
         ]);
 
-        $cardData = $this->getCardData($data['card_pan_no']);
+        $cardData = $this->getCardData($data['card_no']);
 
         if ($cardData) {
 
-            $issueCard = new IssueCard();
-            $issueCard->cust_id = $data['cust_id'];
-            $issueCard->card_pan_no = $data['card_pan_no'];
-            $issueCard->card_cvv_no = $cardData->card_cvv_no;
-            $issueCard->card_expiry = Carbon::create(now())->addYears(5);
-            $issueCard->is_blocked = false;
-            $issueCard->save();
+            $user_check = DB::table('cust_card_info')
+                ->where('cust_id','=',$data['card_no'])
+                ->first();
+            if(!is_null($user_check)){
+                return response([
+                    'success' => false,
+                    'error' => 'User already have a card'
+                ]);
+            }
 
-            DB::table('card_inventories')
-                ->where('card_pan_no','=',$data['card_pan_no'])
+            DB::table('card_inv')
+                ->where('card_no','=',$data['card_no'])
                 ->update([
                     'is_issued' => false
                 ]);
 
-            return response([
-                'success' => true,
+            $user_exist = DB::table('block_wal')
+                ->where('cust_id','=',$request->input('cust_id'))
+                ->first();
+            if(!is_null($user_exist)){
+                return response([
+                    'success'=>false,
+                    'error' => 'User already issued card'
+                ]);
+            }
+
+            DB::table('block_wal')->insert([
+                'cust_id' => $request->input('cust_id'),
+                'tnx_amount'=>$request ->input('amount'),
+                'card_no'=>$request->input('card_no'),
+                'is_settle' => false,
             ]);
 
+            return response([
+                'success'=> true,
+                'cust_id'=>$request->input('cust_id'),
+                'session_token'=>$request->input('session_token'),
+                'card_no' => $request->input('card_no'),
+                'message' => 'Recharge Pending.....'
+            ]);
         }
+
+
+        /*   return response([
+               'success' => true,
+               'cust_id' => $data['cust_id'],
+               'session_token' => $data['session_token'],
+               'card_info' => $cardData
+           ]);*/
+
+
 
         return response([
             'success' => false,
@@ -86,9 +120,10 @@ class CardController extends Controller
 
     }
 
-    private function getCardData($card_pan_no)
+    private function getCardData($card_no)
     {
-        $card_data = CardInventory::where('card_pan_no', $card_pan_no)
+        $card_data = DB::table('card_inv')
+            ->where('card_no','=',$card_no)
             ->where('is_issued', true)
             ->first();
 
@@ -96,5 +131,7 @@ class CardController extends Controller
         else return $card_data;
 
     }
+
+
 
 }

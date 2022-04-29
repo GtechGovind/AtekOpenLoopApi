@@ -13,10 +13,13 @@ class CreateCardInventoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('card_inventories', function (Blueprint $table) {
-            $table->id('card_inventory_id');
+        Schema::create('card_inv', function (Blueprint $table) {
+            $table->id('card_inv_id');
+            $table->string('card_no');
+            $table->integer('card_fee');
             $table->string('card_pan_no');
             $table->string('card_cvv_no');
+            $table->string('card_expiry');
             $table->boolean('is_issued');
             $table->timestamps();
         });
