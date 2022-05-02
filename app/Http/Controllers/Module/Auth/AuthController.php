@@ -92,16 +92,26 @@ class AuthController extends Controller
             if (!is_null($card_info)) {
                 return response([
                     'success' => true,
-                    'card' => true,
+                    'hasCard' => true,
+                    'message' => 'User has a card',
                     'session_token' => $user_session->session_token,
                     'card_details' => $card_info
+                ]);
+            } else {
+
+                return response([
+                    'success' => true,
+                    'hasCard' => false,
+                    'message' =>'user Kyc completed but card not issued',
+                    'session_token' => $user_session->session_token
                 ]);
             }
         } else {
 
             return response([
                 'success' => true,
-                'card' => false,
+                'hasCard' => false,
+                'message' => 'User Kyc not registered',
                 'session_token' => $user_session->session_token
             ]);
         }
