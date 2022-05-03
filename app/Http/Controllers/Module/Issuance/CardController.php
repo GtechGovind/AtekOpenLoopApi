@@ -59,6 +59,7 @@ class CardController extends Controller
             $user_check = DB::table('cust_card_info')
                 ->where('cust_id','=',$data['card_no'])
                 ->first();
+
             if(!is_null($user_check)){
                 return response([
                     'success' => false,
@@ -75,6 +76,7 @@ class CardController extends Controller
             $user_exist = DB::table('block_wal')
                 ->where('cust_id','=',$request->input('cust_id'))
                 ->first();
+
             if(!is_null($user_exist)){
                 return response([
                     'success'=>false,

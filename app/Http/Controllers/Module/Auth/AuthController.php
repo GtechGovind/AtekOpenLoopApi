@@ -8,6 +8,7 @@ use App\Models\UserSession;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Psr\Http\Client\ClientExceptionInterface;
 use Vonage\Client;
 use Vonage\Client\Credentials\Basic;
@@ -18,10 +19,18 @@ class AuthController extends Controller
 
     function sendOtp(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'mobile_no' => 'required|min:10|max:10',
             'message_media' => 'required|min:1|max:2'
         ]);
+
+        if ($validator->fails()) {
+            return response([
+                'success' => false,
+                'code' => env('VALIDATION_ERROR_CODE'),
+                'error' => $validator->errors()
+            ]);
+        }
 
         $mobile_number = $request->input('mobile_no');
         $otp = rand(111111, 999999);
@@ -38,15 +47,25 @@ class AuthController extends Controller
 
         return response([
             'success' => true,
+            'code' => env('OTP_SENT_SUCCESSFULLY_CODE'),
+            'message' => "OTP sent successfully",
         ]);
 
     }
 
     function validateOtp(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'otp' => 'required|min:6|max:6'
         ]);
+
+        if ($validator->fails()) {
+            return response([
+                'success' => false,
+                'code' => env('VALIDATION_ERROR_CODE'),
+                'error' => $validator->errors()
+            ]);
+        }
 
         $otp = $request->input('otp');
 
@@ -54,22 +73,14 @@ class AuthController extends Controller
 
         if (is_null($user_session)) return response([
             'success' => false,
-            'message' => 'Something went wrong !',
-            'errors' => [
-                'otp' => [
-                    "Invalid request, no data found !"
-                ]
-            ]
+            'code' => env('WRONG_OTP_ERROR_CODE'),
+            'error' => "Invalid OTP, please check OTP again !"
         ]);
 
         if (Carbon::create($user_session->otp_expires_at)->timestamp < Carbon::now()->timestamp) return response([
             'success' => false,
-            'message' => 'Something went wrong !',
-            'errors' => [
-                'otp' => [
-                    "OTP Expired!"
-                ]
-            ]
+            'code' => env('OTP_EXPIRED_ERROR'),
+            'error' => "OTP expired, please send OTP again !"
         ]);
 
         $user_session->session_token = hash(
@@ -80,11 +91,12 @@ class AuthController extends Controller
         $user_session->session_created_at = Carbon::now();
         $user_session->session_expires_at = Carbon::now()->addMinutes(25);
         $user_session->save();
-        $userKycinfo =  DB::table('cust_kyc_infos')
+
+        $userKycInfo =  DB::table('cust_kyc_infos')
             ->where('mobile_no', '=',$user_session->mobile_no)
             ->first();
 
-        if(!is_null($userKycinfo)) {
+        if(!is_null($userKycInfo)) {
             $card_info = DB::table('cust_card_info')
                 ->where('cust_id', '=', $userKycinfo->cust_id)
                 ->first();
