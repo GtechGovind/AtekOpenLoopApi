@@ -97,38 +97,27 @@ class AuthController extends Controller
             ->first();
 
         if(!is_null($userKycInfo)) {
+
             $card_info = DB::table('cust_card_info')
-                ->where('cust_id', '=', $userKycinfo->cust_id)
+                ->where('cust_id', '=', $userKycInfo->cust_id)
                 ->first();
 
             if (!is_null($card_info)) {
                 return response([
-                    'success' => true,
-                    'hasCard' => true,
-                    'message' => 'User has a card',
+                    'success' => false,
+                    'code' => env('USER_ALREADY_HAS_CARD_CODE'),
                     'session_token' => $user_session->session_token,
                     'card_details' => $card_info
                 ]);
-            } else {
-
-                return response([
-                    'success' => true,
-                    'hasCard' => false,
-                    'message' =>'user Kyc completed but card not issued',
-                    'session_token' => $user_session->session_token
-                ]);
             }
-        } else {
-
-            return response([
-                'success' => true,
-                'hasCard' => false,
-                'message' => 'User Kyc not registered',
-                'session_token' => $user_session->session_token
-            ]);
         }
 
-
+        return response([
+            'success' => true,
+            'code' => env('OTP_VERIFIED_SUCCESSFULLY'),
+            'message' => 'User Kyc not registered',
+            'session_token' => $user_session->session_token
+        ]);
 
     }
 

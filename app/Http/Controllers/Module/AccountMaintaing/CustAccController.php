@@ -21,6 +21,7 @@ class CustAccController extends Controller
         if (!AuthController::isSessionValid($data['session_token'])) return response([
             'success' => false,
             'message' => 'Something went wrong !',
+            'code' => env('SESSION_EXPIRED_ERROR_CODE'),
             'errors' => [
                 'session' => [
                     "Session is expired !"
@@ -69,6 +70,7 @@ class CustAccController extends Controller
 
                 return response([
                     'success'=>true,
+                    'code' => env('SESSION_EXPIRED_ERROR_CODE'),
                     'Message' => 'Recharged successfully'
                 ]);
             }
@@ -99,6 +101,7 @@ class CustAccController extends Controller
 
             return response([
                 'success'=>true,
+                'code' => env('RECHARGE_SUCCESSFULLY_CODE'),
                 'Message' => 'Recharged successfully'
             ]);
 
@@ -110,6 +113,7 @@ class CustAccController extends Controller
             if($monthlyBalance >= $UserExist->eligible_limit){
                 return response([
                     'success'=> false,
+                    'code' => env('USER_REACHED_ELIGIBLE_LIMIT'),
                     'message' => 'User reached to Eligile Limit'
                 ]);
             }
@@ -129,12 +133,13 @@ class CustAccController extends Controller
 
             return response([
                 'success' => true,
+                'code' => env('AMOUNT_UPDATE_SUCCESS_CODE'),
                 'message' => 'Amount updated successfully'
             ]);
         }
     }
 
-    //Update Balance from Account to Chip 
+    //Update Balance from Account to Chip
     public function updateBalance(Request $request){
         $request->validate([
             'card_no' => 'required|min:4|max:4',
@@ -148,6 +153,7 @@ class CustAccController extends Controller
         if(is_null($user_acc)){
             return response([
                 'success'=> false,
+                'code' => env('INVALID_CARD_NUMBER_CODE'),
                 'error' => 'Invalid card number, card not found'
             ]);
 
@@ -159,6 +165,7 @@ class CustAccController extends Controller
             if($monthlyBalance >= $user_acc->eligible_limit){
                 return response([
                     'success'=> false,
+                    'code' => env('USER_REACHED_ELIGIBLE_LIMIT'),
                     'message' => 'User reached to Eligile Limit'
                 ]);
             }
@@ -179,6 +186,7 @@ class CustAccController extends Controller
 
             return response([
                 'success' => true,
+                'code' => env('AMOUNT_UPDATE_SUCCESS_CODE'),
                 'message' => 'Amount updated successfully'
             ]);
         }
@@ -199,6 +207,7 @@ class CustAccController extends Controller
         if(is_null($user_acc)){
             return response([
                 'success'=> false,
+                'code' => env('INVALID_CARD_NUMBER_CODE'),
                 'error' => 'Invalid card number, card not found'
             ]);
 
@@ -210,6 +219,7 @@ class CustAccController extends Controller
             if($monthlyBalance >= $user_acc->eligible_limit){
                 return response([
                     'success'=> false,
+                    'code' => env('USER_REACHED_ELIGIBLE_LIMIT'),
                     'message' => 'User reached to Eligile Limit'
                 ]);
             }
@@ -230,6 +240,7 @@ class CustAccController extends Controller
 
             return response([
                 'success' => true,
+                'code' => env('AMOUNT_UPDATE_SUCCESS_CODE'),
                 'message' => 'chip balance updated successfully'
             ]);
 
@@ -251,6 +262,7 @@ class CustAccController extends Controller
         if(is_null($user_acc)){
             return response([
                 'success'=> false,
+                'code' => env('INVALID_CARD_NUMBER_CODE'),
                 'error' => 'Invalid card number, card not found'
             ]);
 
@@ -275,6 +287,7 @@ class CustAccController extends Controller
 
             return response([
                 'success' => true,
+                'code' => env('AMOUNT_UPDATE_SUCCESS_CODE'),
                 'message' => 'Account balance updated successfully'
             ]);
 
