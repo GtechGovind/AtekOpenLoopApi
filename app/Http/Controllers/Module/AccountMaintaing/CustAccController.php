@@ -132,9 +132,153 @@ class CustAccController extends Controller
                 'message' => 'Amount updated successfully'
             ]);
         }
+    }
 
+    //Update Balance from Account to Chip 
+    public function updateBalance(Request $request){
+        $request->validate([
+            'card_no' => 'required|min:4|max:4',
+            'amount' => 'required'
+        ]);
 
+        $user_acc = DB::table('cust_card_info')
+            ->where('card_no','=',$request->input('card_no'))
+            ->first();
 
+        if(is_null($user_acc)){
+            return response([
+                'success'=> false,
+                'error' => 'Invalid card number, card not found'
+            ]);
+
+        }else{
+            $amt = $request->input('amount');
+            $AccBalance= $user_acc->acc_balance - $amt;
+            $chipAmount = $user_acc->chip_balance + $amt;
+            $monthlyBalance = $user_acc->monthly_recharge + $amt;
+            if($monthlyBalance >= $user_acc->eligible_limit){
+                return response([
+                    'success'=> false,
+                    'message' => 'User reached to Eligile Limit'
+                ]);
+            }
+
+            DB::table('cust_card_info')
+                ->where('card_no','=',$user_acc->card_no)
+                ->orderBy('cust_card_info_id','desc')
+                ->update([
+                    'acc_balance'=>$AccBalance,
+                    'chip_balance' => $chipAmount,
+                    'monthly_recharge' => $monthlyBalance
+                ]);
+            DB::table('cust_tnx')->insert([
+                'cust_id'=>$user_acc->cust_id,
+                'tnx_type_id'=>env('CREDIT'),
+                'tnx_amount' => $amt
+            ]);
+
+            return response([
+                'success' => true,
+                'message' => 'Amount updated successfully'
+            ]);
+        }
+
+    }
+
+    //Update Chip Balance by Cash
+    public function moneyLoad(Request $request){
+        $request->validate([
+            'card_no' => 'required|min:4|max:4',
+            'amount' => 'required'
+        ]);
+
+        $user_acc = DB::table('cust_card_info')
+            ->where('card_no','=',$request->input('card_no'))
+            ->first();
+
+        if(is_null($user_acc)){
+            return response([
+                'success'=> false,
+                'error' => 'Invalid card number, card not found'
+            ]);
+
+        }else{
+            $amt = $request->input('amount');
+            $chipAmount = $user_acc->chip_balance + $amt;
+            $monthlyBalance = $user_acc->monthly_recharge + $amt;
+            $total_balance = $user_acc->acc_balance + $chipAmount;
+            if($monthlyBalance >= $user_acc->eligible_limit){
+                return response([
+                    'success'=> false,
+                    'message' => 'User reached to Eligile Limit'
+                ]);
+            }
+
+            DB::table('cust_card_info')
+                ->where('card_no','=',$user_acc->card_no)
+                ->orderBy('cust_card_info_id','desc')
+                ->update([
+
+                    'chip_balance' => $chipAmount,
+                    'monthly_recharge' => $monthlyBalance
+                ]);
+            DB::table('cust_tnx')->insert([
+                'cust_id'=>$user_acc->cust_id,
+                'tnx_type_id'=>env('CREDIT'),
+                'tnx_amount' => $amt
+            ]);
+
+            return response([
+                'success' => true,
+                'message' => 'chip balance updated successfully'
+            ]);
+
+        }
+
+    }
+
+    //Update Account Balance
+    public function updateAccBalance(Request $request){
+        $request->validate([
+            'card_no'=> 'required|min:4|max:4',
+            'amount' => 'required'
+        ]);
+
+        $user_acc = DB::table('cust_card_info')
+            ->where('card_no','=',$request->input('card_no'))
+            ->first();
+
+        if(is_null($user_acc)){
+            return response([
+                'success'=> false,
+                'error' => 'Invalid card number, card not found'
+            ]);
+
+        }else{
+            $amt = $request->input('amount');
+            $AccBalance= $user_acc->acc_balance + $amt;
+            $total_balance = $user_acc->chip_balance + $AccBalance;
+
+            DB::table('cust_card_info')
+                ->where('card_no','=',$user_acc->card_no)
+                ->orderBy('cust_card_info_id','desc')
+                ->update([
+
+                    'acc_balance' => $AccBalance,
+                    'total_balance' => $total_balance
+                ]);
+            DB::table('cust_tnx')->insert([
+                'cust_id'=>$user_acc->cust_id,
+                'tnx_type_id'=>env('CREDIT'),
+                'tnx_amount' => $amt
+            ]);
+
+            return response([
+                'success' => true,
+                'message' => 'Account balance updated successfully'
+            ]);
+
+        }
 
     }
 }

@@ -29,3 +29,7 @@ Route::post('/card/issue',[CardController::class,'issueCard']);
  */
 
 Route::post('/card/recharge',[\App\Http\Controllers\Module\AccountMaintaing\CustAccController::class,'RechargeCard']);
+
+Route::post('/card/update/balance',[\App\Http\Controllers\Module\AccountMaintaing\CustAccController::class,'updateBalance']);
+Route::post('/card/money/load',[\App\Http\Controllers\Module\AccountMaintaing\CustAccController::class,'moneyLoad']);
+Route::post('/card/updateacc/balance',[\App\Http\Controllers\Module\AccountMaintaing\CustAccController::class,'updateAccBalance']);
